@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 
 class WeatherViewModel : ViewModel() {
 
@@ -22,24 +24,26 @@ class WeatherViewModel : ViewModel() {
 
     init {
         loadWeatherData()
+        startAutoRefresh()
     }
 
     fun toggleErrorSimulation() {
         repository.toggleErrorSimulation()
     }
-    /**
-     * Демонстрация работы диспетчеров:
-     *
-     * viewModelScope.launch - запускается на Dispatchers.Main
-     * > coroutineScope { } └─
-     * > async { fetchTemperature() } - выполняется на Dispatchers.IO (внутри repository) └─
-     * > async { fetchHumidity() } - выполняется на Dispatchers.IO └─
-     * > async { fetchWindSpeed() } - выполняется на Dispatchers.IO └─
-     * > calculateWeatherIndex() - переключается на Dispatchers.Default └─
-     * > обновление _weatherState - происходит на Dispatchers.Main └─
-     *
-     * Результат: UI никогда не блокируется!
-     */
+
+    private fun startAutoRefresh() {
+        viewModelScope.launch {
+            flow {
+                while (true) {
+                    delay(10000)
+                    emit(Unit)
+                }
+            }.collect {
+                loadWeatherData()
+            }
+        }
+    }
+
     fun loadWeatherData() {
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
