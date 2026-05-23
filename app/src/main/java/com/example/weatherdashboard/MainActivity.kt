@@ -76,6 +76,7 @@ fun WeatherDashboardScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+
         WeatherCard(
             emoji = "💧",
             title = "Humidity",
@@ -85,12 +86,23 @@ fun WeatherDashboardScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+
         WeatherCard(
             emoji = "🌬️",
             title = "Wind Speed",
             value = weatherState.windSpeed?.let { "$it m/s" } ?: "—",
             isLoading = weatherState.isLoading && weatherState.windSpeed == null
         )
+
+        if (weatherState.weatherIndex != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            WeatherCard(
+                emoji = "📊",
+                title = "Weather Index",
+                value = weatherState.weatherIndex.toString(),
+                isLoading = false
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
