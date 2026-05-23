@@ -4,14 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherdashboard.data.WeatherData
 import com.example.weatherdashboard.data.WeatherRepository
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.async
 
 class WeatherViewModel : ViewModel() {
+
     private val repository = WeatherRepository()
+
     private val _weatherState = MutableStateFlow(WeatherData())
     val weatherState: StateFlow<WeatherData> = _weatherState.asStateFlow()
 
@@ -23,9 +25,14 @@ class WeatherViewModel : ViewModel() {
         viewModelScope.launch {
             _weatherState.value = _weatherState.value.copy(
                 isLoading = true,
-                error = null
+                error = null,
+                loadingProgress = "Запуск загрузки..."
             )
+
             try {
+                _weatherState.value = _weatherState.value.copy(
+                    loadingProgress = "Загрузка температуры, влажности, скорости ветра..."
+                )
                 val temperatureDeferred = async { repository.fetchTemperature() }
                 val humidityDeferred = async { repository.fetchHumidity() }
                 val windSpeedDeferred = async { repository.fetchWindSpeed() }
@@ -39,13 +46,15 @@ class WeatherViewModel : ViewModel() {
                     humidity = humidity,
                     windSpeed = windSpeed,
                     isLoading = false,
-                    error = null
+                    error = null,
+                    loadingProgress = "Загрузка завершена!"
                 )
 
             } catch (e: Exception) {
                 _weatherState.value = _weatherState.value.copy(
                     isLoading = false,
-                    error = "Ошибка загрузки: ${e.message}"
+                    error = "Ошибка загрузки: ${e.message}",
+                    loadingProgress = ""
                 )
             }
         }

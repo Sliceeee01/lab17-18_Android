@@ -84,7 +84,6 @@ fun WeatherDashboardScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Карточка для ветра
         WeatherCard(
             emoji = "🌬️",
             title = "Wind Speed",
@@ -99,6 +98,14 @@ fun WeatherDashboardScreen(
             enabled = !weatherState.isLoading
         ) {
             Text(text = if (weatherState.isLoading) "Loading..." else "🔄 Refresh Weather")
+        }
+        if (weatherState.loadingProgress.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = weatherState.loadingProgress,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
         }
         if (weatherState.error != null) {
             Spacer(modifier = Modifier.height(16.dp))
